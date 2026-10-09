@@ -368,6 +368,9 @@ a:hover { color: #b0005a; }
 .sort-box .lock-msg { text-align: center; }
 .sort-box .need-hint { display: block; margin: 0 auto; }
 .bad { color: #d0342c; }
+.lightbox { position: relative; min-height: 200px; display: flex; align-items: center; justify-content: center; }
+.lightbox::before { content: "照片載入中……"; position: absolute; color: var(--muted); font-size: 14px; z-index: 0; }
+.lightbox > * { position: relative; z-index: 1; }
 .lightbox .photo-ph { font-size: 96px; }
 .lightbox .photo-img { aspect-ratio: auto; max-height: 70vh; object-fit: contain; background: none; }
 .lightbox .ph-label { font-size: 18px; }
