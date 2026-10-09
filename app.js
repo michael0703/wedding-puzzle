@@ -220,7 +220,7 @@
       const L = S.locks[id];
       return `<li><a href="${L.where}">${state.solved[id] ? '✅' : '🔒'} ${L.name}</a></li>`;
     }).join('');
-    const latest = S.guestbook.filter((g) => !g.private).slice(0, 3).map((g) =>
+    const latest = S.guestbook.filter((g) => !g.private && isVisible(g)).slice(0, 3).map((g) =>
       `<li><a href="#/guestbook">${g.avatar} ${g.name}：${stripHtml(g.text).slice(0, 12)}</a></li>`).join('');
     $('#side').innerHTML = `
       <section class="box">
@@ -626,7 +626,7 @@
   }
 
   function viewGuestbook() {
-    const items = S.guestbook.map((g) => `
+    const items = S.guestbook.filter(isVisible).map((g) => `
       <div class="gb-item ${g.private ? 'private' : ''}">
         <div class="gb-head"><span class="gb-avatar">${g.avatar}</span><b>${g.name}</b><span class="small muted">${g.date}</span></div>
         <div class="gb-text">${g.text}</div>
@@ -716,10 +716,10 @@
     saveState();
     refresh();
     if (lockId === S.finalLock) return showEnding();
-    const revealed = POSTS.filter((p) => p.showIf === lockId);
-    toast(revealed.length
-      ? `🔑 解開了！網誌出現了一篇新文章（${solvedCount()}/${LOCK_IDS.length}）`
-      : `🔑 解開了！（${solvedCount()}/${LOCK_IDS.length}）`);
+    const news = [];
+    if (POSTS.some((p) => p.showIf === lockId)) news.push('網誌有新文章');
+    if (S.guestbook.some((g) => g.showIf === lockId)) news.push('留言板有新留言');
+    toast(`🔑 解開了！${news.length ? news.join('、') + '！' : ''}（${solvedCount()}/${LOCK_IDS.length}）`);
   }
 
   function refresh() {
