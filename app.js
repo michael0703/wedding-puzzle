@@ -765,8 +765,10 @@
   function sortAnswerHtml() {
     const list = SORT.answer.map((id) => {
       const p = postById(id);
-      const label = p.photo.label || p.photo.ph || '照片';
-      return `<li>${esc(label)}　←〈${p.title}〉${p.date.split(' ')[0]}</li>`;
+      const pic = p.photo.src
+        ? `<img class="answer-thumb" src="${p.photo.src}" alt="">`
+        : esc(p.photo.label || p.photo.ph || '照片');
+      return `<li>${pic}〈${p.title}〉${p.date.split(' ')[0]}</li>`;
     }).join('');
     return `正確順序：<ol class="answer-list">${list}</ol><button type="button" class="btn" id="autoSort">幫我排好</button>`;
   }
