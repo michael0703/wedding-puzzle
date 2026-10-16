@@ -16,6 +16,7 @@
       started: false, startAt: null, finishAt: null,
       solved: {}, hintLevel: {}, wrong: {},
       sortSlots: null, claim: null,
+      calMarks: {},
     };
   }
   function loadState() {
@@ -187,6 +188,7 @@
           <a href="#/" data-tab="home">網誌</a>
           <a href="#/album" data-tab="album">相簿</a>
           <a href="#/guestbook" data-tab="guestbook">留言板</a>
+          ${S.calendar ? '<a href="#/calendar" data-tab="calendar">行事曆</a>' : ''}
           <a href="#/profile" data-tab="profile">關於我</a>
           <button type="button" class="keys-pill" id="keysPill" aria-label="秘密進度"></button>
         </nav>
@@ -233,6 +235,10 @@
         <h3>🔑 秘密進度 ${solvedCount()}/${LOCK_IDS.length}</h3>
         <ul class="plain">${lockList}</ul>
       </section>
+      ${S.calendar ? `<section class="box">
+        <h3>☆ 行事曆</h3>
+        <p class="small"><a href="#/calendar">📅 ${S.calendar.title}</a></p>
+      </section>` : ''}
       <section class="box">
         <h3>☆ 最新留言</h3>
         <ul class="plain">${latest}</ul>
@@ -638,6 +644,57 @@
       ${items}`;
   }
 
+  // ----- 行事曆 -----
+  function monthGrid(ym) {
+    const [y, m] = ym.split('/').map(Number);
+    const first = new Date(y, m - 1, 1).getDay();
+    const days = new Date(y, m, 0).getDate();
+    const cells = [];
+    for (let i = 0; i < first; i++) cells.push('<span class="cal-day empty"></span>');
+    for (let d = 1; d <= days; d++) {
+      const key = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      const on = state.calMarks[key];
+      cells.push(`<button type="button" class="cal-day${on ? ' on' : ''}" data-day="${key}" aria-pressed="${!!on}" aria-label="${m}月${d}日">${d}</button>`);
+    }
+    return `
+      <div class="cal-month">
+        <div class="cal-head">${y} 年 ${m} 月</div>
+        <div class="cal-grid">
+          ${['日', '一', '二', '三', '四', '五', '六'].map((w) => `<span class="cal-week">${w}</span>`).join('')}
+          ${cells.join('')}
+        </div>
+      </div>`;
+  }
+
+  function viewCalendar() {
+    const C = S.calendar;
+    if (!C) return notFound();
+    return `
+      <h2 class="section-title">☆ ${C.title}</h2>
+      <p class="small muted">${C.desc}</p>
+      <div class="cal">${C.months.map(monthGrid).join('')}</div>
+      <p class="center"><button type="button" class="link-btn" id="calClear">清除所有標記</button></p>`;
+  }
+
+  function bindCalendar(cal) {
+    cal.addEventListener('click', (e) => {
+      const b = e.target.closest('.cal-day[data-day]');
+      if (!b) return;
+      const key = b.dataset.day;
+      if (state.calMarks[key]) delete state.calMarks[key];
+      else state.calMarks[key] = true;
+      saveState();
+      b.classList.toggle('on', !!state.calMarks[key]);
+      b.setAttribute('aria-pressed', String(!!state.calMarks[key]));
+    });
+    $('#calClear').addEventListener('click', () => {
+      if (!Object.keys(state.calMarks).length || !confirm('確定要清除行事曆上所有的 ♥ 嗎？')) return;
+      state.calMarks = {};
+      saveState();
+      route();
+    });
+  }
+
   function viewProfile() {
     const P = S.profile;
     const rows = P.rows.map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('');
@@ -664,8 +721,11 @@
       album: () => (id ? viewAlbum(id) : viewAlbums()),
       guestbook: viewGuestbook,
       profile: viewProfile,
+      calendar: viewCalendar,
     };
     $('#main').innerHTML = (views[page] || notFound)();
+    // 行事曆要大一點，排出來的字才好看：這一頁不顯示側邊欄
+    $('.layout').classList.toggle('wide', page === 'calendar');
     $$('.tabs a').forEach((a) => {
       const tab = a.dataset.tab;
       a.classList.toggle('on', tab === page || (tab === 'home' && page === 'post'));
@@ -696,6 +756,7 @@
     });
     $$('.sort-box').forEach(bindSort);
     $$('form.claim-form').forEach(bindClaim);
+    $$('.cal').forEach(bindCalendar);
     const reset = $('#resetBtn');
     if (reset) {
       reset.addEventListener('click', () => {
