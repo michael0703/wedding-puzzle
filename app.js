@@ -645,7 +645,11 @@
   }
 
   // ----- 行事曆 -----
-  function monthGrid(ym) {
+  function calPresets() {
+    return new Set((S.calendar.preset || []).map(dateKey));
+  }
+
+  function monthGrid(ym, presets) {
     const [y, m] = ym.split('/').map(Number);
     const first = new Date(y, m - 1, 1).getDay();
     const days = new Date(y, m, 0).getDate();
@@ -653,6 +657,11 @@
     for (let i = 0; i < first; i++) cells.push('<span class="cal-day empty"></span>');
     for (let d = 1; d <= days; d++) {
       const key = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      if (presets.has(key)) {
+        const label = S.calendar.presetLabel ? `<span class="cal-label">${S.calendar.presetLabel}</span>` : '';
+        cells.push(`<span class="cal-day preset" aria-label="${m}月${d}日（已標記）">${d}${label}</span>`);
+        continue;
+      }
       const on = state.calMarks[key];
       cells.push(`<button type="button" class="cal-day${on ? ' on' : ''}" data-day="${key}" aria-pressed="${!!on}" aria-label="${m}月${d}日">${d}</button>`);
     }
@@ -672,7 +681,7 @@
     return `
       <h2 class="section-title">☆ ${C.title}</h2>
       <p class="small muted">${C.desc}</p>
-      <div class="cal">${C.months.map(monthGrid).join('')}</div>
+      <div class="cal">${C.months.map((ym) => monthGrid(ym, calPresets())).join('')}</div>
       <p class="center"><button type="button" class="link-btn" id="calClear">清除所有標記</button></p>`;
   }
 

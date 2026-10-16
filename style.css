@@ -148,6 +148,16 @@ a:hover { color: #b0005a; }
   user-select: none;
 }
 .cal-day.empty { background: none; border: 0; cursor: default; }
+.cal-day.preset {
+  flex-direction: column;
+  line-height: 1.1;
+  background: #e8364f;
+  border-color: #c21f38;
+  color: #fff;
+  font-weight: bold;
+  cursor: default;
+}
+.cal-label { font-size: 10px; font-weight: normal; opacity: .9; }
 .cal-day:hover { border-color: var(--pink); }
 .cal-day.on {
   background: var(--pink);
