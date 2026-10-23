@@ -146,7 +146,7 @@ window.SETTINGS = {
     // 抽獎密碼：留空 = 不需要密碼，抽獎頁打開就自動讀名單（Apps Script 的 DRAW_KEY 也要留空）
     // 不要在這裡寫你在別處也會用的密碼，這個檔案會放上 GitHub
     key: '',
-    prizes: ['第 1 個紅包', '第 2 個紅包', '第 3 個紅包'],
+    prizes: ['第 1 個紅包', '第 2 個紅包', '第 3 個紅包', '第 4 個紅包', '第 5 個紅包'],
   },
 
   sheetUrl: 'https://script.google.com/macros/s/AKfycbwL7-2Xk4-10XwAr422-dJFmVbjOOjRFCtfYGJJvPyda75WYgTA1wBM05qMjXV_ny8y/exec',
