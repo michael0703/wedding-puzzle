@@ -329,7 +329,7 @@
     try { key = sessionStorage.getItem(KEY_KEY) || ''; } catch (e) { /* ignore */ }
 
     const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    const $ = (sel) => app.querySelector(sel);
+    const $ = (sel, root) => (root || app).querySelector(sel);
     function randInt(n) {
       const buf = new Uint32Array(1);
       crypto.getRandomValues(buf);
@@ -344,26 +344,40 @@
       return names.map((name, i) => ({ name, serial: 'DEMO' + String.fromCharCode(65 + (i % 26)) + (i % 10), at: i }));
     }
 
-    async function fetchEntries() {
+    const idOf = (e) => e.serial + '|' + e.name;
+
+    async function fetchEntries(onRetry) {
       if (DEMO) return demoEntries();
       if (!S.sheetUrl) throw new Error('settings.js 還沒設定 sheetUrl');
-      // Google 偶爾會卡住不回應：15 秒沒回應就放棄，讓主持人再按一次
-      const ctl = new AbortController();
-      const timer = setTimeout(() => ctl.abort(), 15000);
-      let r;
-      try {
-        r = await fetch(S.sheetUrl, { method: 'POST', body: JSON.stringify({ action: 'list', key }), signal: ctl.signal });
-      } catch (e) {
-        throw new Error(e.name === 'AbortError' ? 'Google 沒有回應，請再按一次' : '連線失敗，請檢查網路後再試一次');
-      } finally {
-        clearTimeout(timer);
-      }
+      // Google 偶爾很慢或回錯誤頁（閒置後第一次要 5～15 秒，有時還會 404）：
+      // 每次最多等 20 秒，失敗就自動再試，最多 3 次
       let data;
-      try { data = await r.json(); } catch (e) { throw new Error('讀不到名單：Apps Script 可能還沒更新成新版並重新部署'); }
-      if (!data.ok) throw new Error(data.error === 'key' ? '密碼不對（或 Apps Script 還沒設定 DRAW_KEY）' : '讀取失敗');
-      // 同一個序號只算一次
+      let lastErr;
+      for (let attempt = 1; attempt <= 3 && !data; attempt++) {
+        if (attempt > 1 && onRetry) onRetry(attempt);
+        const ctl = new AbortController();
+        const timer = setTimeout(() => ctl.abort(), 20000);
+        try {
+          const r = await fetch(S.sheetUrl, { method: 'POST', body: JSON.stringify({ action: 'list', key }), signal: ctl.signal });
+          data = await r.json();
+        } catch (e) {
+          lastErr = e;
+        } finally {
+          clearTimeout(timer);
+        }
+      }
+      if (!data) {
+        throw new Error(lastErr && lastErr.name === 'AbortError'
+          ? 'Google 一直沒有回應，請按「重新連線」再試一次'
+          : '讀不到名單，請按「重新連線」再試一次（一直不行的話，檢查網路或 Apps Script 是否部署成新版）');
+      }
+      if (!data.ok && data.error === 'key') {
+        throw new Error(key ? '密碼不對' : 'Apps Script 還在要求密碼：請換上新版程式（DRAW_KEY 留空）並重新部署');
+      }
+      if (!data.ok) throw new Error('讀取失敗');
+      // 名字和序號都一樣才算同一個人（兩人剛好撞號時兩個都算）
       const seen = new Set();
-      return data.entries.filter((e) => e.serial && !seen.has(e.serial) && seen.add(e.serial));
+      return data.entries.filter((e) => e.serial && !seen.has(idOf(e)) && seen.add(idOf(e)));
     }
 
     // ---------- 畫面 ----------
@@ -396,22 +410,33 @@
 
     function renderLogin() {
       if (DEMO) { state.entries = demoEntries(); state.phase = 'collect'; save(); return render(); }
+      // 設定檔有 key 欄位（留空 = 不需要密碼）的話，打開就自動連線
+      const auto = typeof D.key === 'string';
+      if (auto) key = D.key;
       app.innerHTML = `
         ${header('主持人專用')}
         <form class="card" id="login">
-          <div class="label">請輸入抽獎密碼</div>
-          <input type="password" id="key" autocomplete="off" value="${esc(key)}">
-          <div><button class="btn btn-gold" type="submit">連線</button></div>
+          ${auto ? '<div class="label">正在讀取破關名單……</div>' : `
+            <div class="label">請輸入抽獎密碼</div>
+            <input type="password" id="key" autocomplete="off" value="${esc(key)}">`}
+          <div><button class="btn btn-gold" type="submit" ${auto ? 'hidden' : ''}>${auto ? '重新連線' : '連線'}</button></div>
           <p class="msg" id="msg"></p>
         </form>
         ${footer()}`;
-      $('#login').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        key = $('#key').value.trim();
+      const form = $('#login');
+      const connect = async () => {
+        if (!auto) key = $('#key').value.trim();
+        const btn = $('button[type=submit]', form);
         $('#msg').textContent = '連線中……';
         $('#msg').className = 'msg muted';
+        // 第一次叫醒 Google 比較慢，5 秒後提示一下，免得以為當掉
+        const slow = setTimeout(() => {
+          if ($('#msg') && $('#msg').textContent === '連線中……') $('#msg').textContent = '連線中……第一次連線 Google 比較慢，大約要 10 秒，請稍候';
+        }, 5000);
         try {
-          state.entries = await fetchEntries();
+          state.entries = await fetchEntries((n) => {
+            if ($('#msg')) $('#msg').textContent = `Google 回應有點慢，自動重試中（第 ${n} 次）……`;
+          });
           try { sessionStorage.setItem(KEY_KEY, key); } catch (err) { /* ignore */ }
           state.phase = 'collect';
           save();
@@ -419,9 +444,14 @@
         } catch (err) {
           $('#msg').textContent = err.message;
           $('#msg').className = 'msg';
+          btn.hidden = false;
+        } finally {
+          clearTimeout(slow);
         }
-      });
+      };
+      form.addEventListener('submit', (e) => { e.preventDefault(); connect(); });
       bindFooter();
+      if (auto) connect();
     }
 
     let shownCount = 0; // 數字從上次顯示的值往上跳
@@ -479,10 +509,12 @@
         if (t < 1) requestAnimationFrame(step);
       };
       requestAnimationFrame(step);
+      // 分頁在背景時動畫會暫停：時間到就直接顯示正確數字
+      setTimeout(() => { el.textContent = to; }, dur + 100);
     }
 
     const pool = () => state.entries.filter((e) =>
-      !state.winners.some((w) => w.serial === e.serial) && !state.skipped.includes(e.serial));
+      !state.winners.some((w) => idOf(w) === idOf(e)) && !state.skipped.includes(idOf(e)));
     const prizeIndex = () => state.winners.length;
     const nameClass = (name) => (String(name).length > 4 ? ' long' : '');
 
@@ -542,7 +574,7 @@
         render();
       });
       if ($('#redraw')) $('#redraw').addEventListener('click', () => {
-        state.skipped.push(state.current.serial);
+        state.skipped.push(idOf(state.current));
         state.current = null;
         save();
         render();

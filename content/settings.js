@@ -143,6 +143,9 @@ window.SETTINGS = {
     title: '🧧 破關抽紅包 🧧',
     script: 'fen &amp; wei', // 標題上方的英文草寫字
     photo: 'couple.jpg', // 標題旁的新人圖（放在 photos/）
+    // 抽獎密碼：留空 = 不需要密碼，抽獎頁打開就自動讀名單（Apps Script 的 DRAW_KEY 也要留空）
+    // 不要在這裡寫你在別處也會用的密碼，這個檔案會放上 GitHub
+    key: '',
     prizes: ['第 1 個紅包', '第 2 個紅包', '第 3 個紅包'],
   },
 

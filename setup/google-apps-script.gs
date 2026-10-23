@@ -4,9 +4,9 @@
 const SHEET_NAME = '破關名單';
 const HEADERS = ['登記時間', '名字', '序號', '解謎時間', '提示次數'];
 
-// 抽獎頁讀取名單用的密碼：貼到 Apps Script 之後，在那邊改成你自己的密碼
-// （這個檔案會放上 GitHub，不要把真的密碼寫在這裡）
-const DRAW_KEY = '請改成你自己的密碼';
+// 抽獎頁讀取名單用的密碼：留空 = 不需要密碼（settings.js 的 draw.key 也留空）
+// 要設密碼的話，在 Apps Script 那邊填，不要寫在這個檔案（會放上 GitHub）
+const DRAW_KEY = '';
 
 function doPost(e) {
   const data = JSON.parse(e.postData.contents);
@@ -16,11 +16,15 @@ function doPost(e) {
   try {
     const sheet = getSheet();
     const serial = clean(data.serial, 10);
-    // 網路重試可能重送同一筆，同一個序號只記一次
+    const name = clean(data.name, 20);
+    // 網路重試可能重送同一筆：名字和序號都一樣才算重複
+    // （兩個人剛好抽到同一個序號時，名字不同，兩筆都會記下來）
     const rows = sheet.getLastRow() - 1;
-    const serials = rows > 0 ? sheet.getRange(2, 3, rows, 1).getValues().flat() : [];
-    if (serial && !serials.includes(serial)) {
-      sheet.appendRow([new Date(), clean(data.name, 20), serial, clean(data.duration, 20), Number(data.hints) || 0]);
+    const existing = rows > 0 ? sheet.getRange(2, 2, rows, 2).getValues() : [];
+    const plain = (v) => String(v).replace(/^'/, '');
+    const dup = existing.some((r) => plain(r[0]) === plain(name) && String(r[1]) === serial);
+    if (serial && !dup) {
+      sheet.appendRow([new Date(), name, serial, clean(data.duration, 20), Number(data.hints) || 0]);
     }
   } finally {
     lock.releaseLock();
@@ -30,8 +34,7 @@ function doPost(e) {
 
 // 抽獎頁用：密碼正確才回傳名單（名字、序號、登記時間）
 function listEntries(key) {
-  // 還沒改密碼就一律拒絕（用 startsWith，避免「全部取代」把這行也換掉）
-  if (!DRAW_KEY || DRAW_KEY.startsWith('請改成') || key !== DRAW_KEY) return json({ ok: false, error: 'key' });
+  if (DRAW_KEY && key !== DRAW_KEY) return json({ ok: false, error: 'key' });
   const sheet = getSheet();
   const rows = sheet.getLastRow() - 1;
   const values = rows > 0 ? sheet.getRange(2, 1, rows, 3).getValues() : [];
