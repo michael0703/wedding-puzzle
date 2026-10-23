@@ -141,6 +141,8 @@ window.SETTINGS = {
   // 抽獎頁（draw.html）：每個獎項的名稱，照順序抽，數量就是名額
   draw: {
     title: '🧧 破關抽紅包 🧧',
+    script: 'fen &amp; wei', // 標題上方的英文草寫字
+    photo: 'couple.jpg', // 標題旁的新人圖（放在 photos/）
     prizes: ['第 1 個紅包', '第 2 個紅包', '第 3 個紅包'],
   },
 

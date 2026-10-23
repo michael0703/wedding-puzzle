@@ -6,106 +6,301 @@
   <meta name="robots" content="noindex">
   <title>破關抽獎</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧧</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Great+Vibes&display=swap" rel="stylesheet">
   <style>
-    /* 投影用抽獎頁：字要大、對比要夠，遠遠的賓客也看得到 */
+    /* 投影用抽獎頁：酒紅 + 金色的喜氣風格，字要大，遠遠的賓客也看得到 */
     :root {
-      --pink: #ff5fa2;
-      --pink-deep: #e0337e;
-      --pink-soft: #ffe3f0;
-      --gold: #f0b400;
-      --ink: #4a3b44;
-      --muted: #8f7d88;
-      --line: #f7a8cb;
+      --wine: #5c0d1d;
+      --wine-2: #8a1a2e;
+      --red: #c62b3c;
+      --gold: #e8c36a;
+      --gold-light: #fbe7b2;
+      --gold-deep: #b5852d;
+      --cream: #fff8ec;
+      --ink: #3d1a20;
+      --muted: #9a7b6e;
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
     body {
       margin: 0;
-      color: var(--ink);
-      font-family: "Noto Serif TC", "PMingLiU", "新細明體", "Songti TC", serif;
-      background-color: #ffeef6;
-      background-image:
-        radial-gradient(#ffffff 3px, transparent 3.5px),
-        radial-gradient(#ffd1e6 3px, transparent 3.5px);
-      background-size: 44px 44px;
-      background-position: 0 0, 22px 22px;
+      color: var(--cream);
+      font-family: "Noto Serif TC", "PMingLiU", "Songti TC", serif;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(232, 195, 106, .28), transparent 55%),
+        radial-gradient(ellipse at 50% 120%, #2b0610, transparent 60%),
+        linear-gradient(160deg, var(--wine-2), var(--wine) 60%, #3a0712);
+      background-attachment: fixed;
       overflow-x: hidden;
     }
-    .page { min-height: 100%; display: flex; flex-direction: column; align-items: center; padding: 3vh 16px 2vh; text-align: center; }
-    h1 { margin: 0 0 1vh; font-size: clamp(32px, 6vw, 72px); color: var(--pink-deep); text-shadow: 2px 2px 0 #fff; }
-    .sub { margin: 0; font-size: clamp(16px, 2.2vw, 28px); color: var(--muted); }
-    .card {
-      width: min(1100px, 100%);
-      margin-top: 3vh;
-      padding: 4vh 3vw;
-      background: #fff;
-      border: 6px double var(--line);
-      border-radius: 20px;
-      box-shadow: 0 8px 30px rgba(224, 51, 126, .15);
+    /* 背景的細金點 */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: radial-gradient(rgba(251, 231, 178, .18) 1.2px, transparent 1.6px);
+      background-size: 34px 34px;
     }
-    .btn {
-      font: inherit;
-      font-size: clamp(18px, 2.4vw, 30px);
-      font-weight: bold;
-      padding: .5em 1.4em;
-      margin: 8px;
-      color: #fff;
-      background: linear-gradient(#ff7ab5, var(--pink-deep));
-      border: 0;
-      border-radius: 999px;
-      box-shadow: 0 4px 0 #b0005a;
-      cursor: pointer;
+    /* 飄浮的金色光點 */
+    .sparkles { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+    .sparkles i {
+      position: absolute;
+      bottom: -20px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gold-light);
+      box-shadow: 0 0 10px 2px rgba(251, 231, 178, .7);
+      opacity: 0;
+      animation: rise linear infinite;
     }
-    .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #b0005a; }
-    .btn:disabled { opacity: .4; cursor: not-allowed; }
-    .btn-ghost { color: var(--pink-deep); background: #fff; border: 2px solid var(--line); box-shadow: none; }
-    .btn-small { font-size: 15px; padding: .4em 1em; }
-    input {
-      font: inherit;
-      font-size: 22px;
-      padding: .4em .8em;
-      border: 2px solid var(--line);
-      border-radius: 12px;
-      width: min(320px, 100%);
-      text-align: center;
+    @keyframes rise {
+      0% { transform: translateY(0); opacity: 0; }
+      15% { opacity: .8; }
+      100% { transform: translateY(-110vh); opacity: 0; }
     }
-    .muted { color: var(--muted); }
-    .msg { min-height: 1.6em; color: #d0342c; font-size: 18px; }
-    .count { font-size: clamp(64px, 14vw, 180px); font-weight: bold; color: var(--pink-deep); line-height: 1.1; }
-    .count-label { font-size: clamp(20px, 3vw, 38px); }
-    .ticker { margin: 2vh 0; font-size: clamp(16px, 2vw, 26px); color: var(--muted); min-height: 1.5em; }
-    .prize { display: inline-block; padding: .2em 1em; font-size: clamp(22px, 3.4vw, 44px); font-weight: bold; color: #8a5a00; background: #fff6d6; border: 3px solid var(--gold); border-radius: 999px; }
-    .stage {
-      margin: 3vh auto;
-      min-height: 2.2em;
+
+    .page {
+      position: relative;
+      min-height: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      font-size: clamp(48px, 10vw, 150px);
-      font-weight: bold;
-      line-height: 1.15;
-      overflow-wrap: anywhere;
+      padding: 3vh 16px 2vh;
+      text-align: center;
     }
-    .stage.rolling { color: var(--muted); }
-    .stage.win { color: var(--pink-deep); animation: pop .5s ease-out; }
-    .serial { font-family: "Courier New", monospace; font-size: clamp(22px, 3.4vw, 46px); letter-spacing: .2em; color: var(--ink); margin-top: .3em; }
-    @keyframes pop { 0% { transform: scale(.6); } 70% { transform: scale(1.08); } 100% { transform: scale(1); } }
-    .winners { width: min(1100px, 100%); margin-top: 3vh; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
-    .winner { padding: 10px 18px; background: #fff; border: 2px dashed var(--line); border-radius: 12px; font-size: clamp(16px, 2vw, 24px); }
-    .winner b { color: var(--pink-deep); }
-    .winners.final { flex-direction: column; align-items: center; margin: 3vh 0 1vh; }
-    .winners.final .winner { font-size: clamp(24px, 4vw, 52px); border-style: solid; }
-    .winner small { font-family: "Courier New", monospace; color: var(--muted); }
-    .foot { margin-top: auto; padding-top: 3vh; font-size: 14px; color: var(--muted); }
-    .foot button { font: inherit; color: var(--muted); background: none; border: 0; text-decoration: underline; cursor: pointer; }
+
+    /* ---------- 標題 ---------- */
+    .head { display: flex; align-items: center; justify-content: center; gap: 2.5vw; }
+    .couple {
+      flex: none;
+      width: clamp(150px, 20vw, 290px);
+      height: auto;
+      border-radius: 16px;
+      border: 4px solid var(--gold);
+      box-shadow: 0 0 0 6px rgba(232, 195, 106, .25), 0 10px 30px rgba(0, 0, 0, .35);
+      background: var(--cream);
+    }
+    .script { font-family: "Great Vibes", cursive; font-size: clamp(28px, 4vw, 56px); color: var(--gold-light); line-height: 1; }
+    h1 {
+      margin: .1em 0 0;
+      font-size: clamp(34px, 5.6vw, 80px);
+      font-weight: 900;
+      letter-spacing: .08em;
+      background: linear-gradient(180deg, #fff6d8 10%, var(--gold) 55%, var(--gold-deep));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .35));
+    }
+    h1 .emo { color: #000; -webkit-text-fill-color: initial; }
+    .sub { margin: .4em 0 0; font-size: clamp(16px, 2vw, 26px); color: var(--gold-light); opacity: .85; letter-spacing: .1em; }
+
+    /* ---------- 主卡片 ---------- */
+    .card {
+      position: relative;
+      width: min(1100px, 100%);
+      margin-top: 3vh;
+      padding: 4vh 3vw 3.5vh;
+      color: var(--ink);
+      background: linear-gradient(180deg, #fffdf6, var(--cream));
+      border-radius: 22px;
+      box-shadow: 0 0 0 3px var(--gold), 0 0 0 9px rgba(232, 195, 106, .25), 0 25px 60px rgba(0, 0, 0, .45);
+    }
+    /* 四個角的金色花邊 */
+    .card::before, .card::after {
+      content: "❦";
+      position: absolute;
+      top: 10px;
+      font-size: clamp(22px, 3vw, 40px);
+      color: var(--gold-deep);
+      opacity: .7;
+    }
+    .card::before { left: 18px; }
+    .card::after { right: 18px; transform: scaleX(-1); }
+
+    .label { font-size: clamp(18px, 2.4vw, 32px); font-weight: 700; color: var(--wine-2); letter-spacing: .1em; }
+    .muted { color: var(--muted); }
+    .msg { min-height: 1.6em; margin: 10px 0 0; color: var(--red); font-size: 18px; }
+
+    .btn {
+      font: inherit;
+      font-size: clamp(18px, 2.4vw, 32px);
+      font-weight: 700;
+      letter-spacing: .1em;
+      padding: .55em 1.8em;
+      margin: 8px;
+      color: #fff;
+      background: linear-gradient(180deg, #e3485a, var(--red) 50%, #9c1626);
+      border: 2px solid var(--gold);
+      border-radius: 999px;
+      box-shadow: 0 6px 0 #6e0f1c, 0 10px 24px rgba(156, 22, 38, .4);
+      cursor: pointer;
+      transition: transform .1s, box-shadow .1s, filter .2s;
+    }
+    .btn:hover { filter: brightness(1.08); }
+    .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #6e0f1c, 0 4px 10px rgba(156, 22, 38, .4); }
+    .btn:disabled { opacity: .4; cursor: not-allowed; filter: grayscale(.4); }
+    .btn-gold { color: var(--ink); background: linear-gradient(180deg, #fff1c4, var(--gold) 55%, var(--gold-deep)); border-color: #fff1c4; box-shadow: 0 6px 0 #8a6420, 0 10px 24px rgba(181, 133, 45, .4); }
+    .btn-gold:active { box-shadow: 0 2px 0 #8a6420; }
+    .btn-ghost { color: var(--wine-2); background: transparent; border: 2px solid var(--gold-deep); box-shadow: none; }
+    .btn-ghost:active { transform: translateY(2px); box-shadow: none; }
+    .btn-small { font-size: 15px; padding: .45em 1.2em; letter-spacing: .05em; }
+    .go { font-size: clamp(22px, 3.2vw, 44px); padding: .5em 2.4em; animation: pulse 1.8s ease-in-out infinite; }
+    .go:disabled { animation: none; }
+    @keyframes pulse { 50% { box-shadow: 0 6px 0 #6e0f1c, 0 0 0 12px rgba(232, 195, 106, .25), 0 10px 30px rgba(156, 22, 38, .5); } }
+
+    input {
+      font: inherit;
+      font-size: 26px;
+      letter-spacing: .3em;
+      padding: .45em .8em;
+      margin: 14px 0 6px;
+      width: min(320px, 100%);
+      text-align: center;
+      color: var(--ink);
+      background: #fff;
+      border: 2px solid var(--gold);
+      border-radius: 14px;
+      outline: none;
+    }
+    input:focus { box-shadow: 0 0 0 5px rgba(232, 195, 106, .35); }
+
+    /* ---------- 名單收集 ---------- */
+    .count {
+      font-size: clamp(90px, 17vw, 230px);
+      font-weight: 900;
+      line-height: 1;
+      background: linear-gradient(180deg, #e3485a, var(--red) 45%, #7c1020);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-variant-numeric: tabular-nums;
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 2.5vh 0; min-height: 2.6em; }
+    .chip {
+      padding: .25em .9em;
+      font-size: clamp(16px, 2vw, 26px);
+      color: var(--wine-2);
+      background: #fff3d6;
+      border: 1px solid var(--gold);
+      border-radius: 999px;
+      animation: chipIn .5s ease-out both;
+    }
+    @keyframes chipIn { from { transform: translateY(10px); opacity: 0; } }
+
+    /* ---------- 抽獎 ---------- */
+    .prize-row { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+    .prize {
+      display: inline-block;
+      padding: .3em 1.4em;
+      font-size: clamp(24px, 3.6vw, 48px);
+      font-weight: 900;
+      letter-spacing: .12em;
+      color: #fff;
+      background: linear-gradient(180deg, #e3485a, var(--red));
+      border: 3px solid var(--gold);
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(156, 22, 38, .35);
+    }
+    .progress { font-size: clamp(16px, 2vw, 26px); color: var(--muted); }
+
+    /* 拉霸機式的名字轉輪 */
+    .reel {
+      --h: clamp(90px, 15vw, 210px);
+      position: relative;
+      height: var(--h);
+      margin: 4vh auto 2vh;
+      width: min(820px, 100%);
+      overflow: hidden;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #f3e5c8, #fffaf0 30%, #fffaf0 70%, #f3e5c8);
+      box-shadow: inset 0 0 0 3px var(--gold), inset 0 10px 20px rgba(0, 0, 0, .12), inset 0 -10px 20px rgba(0, 0, 0, .12);
+    }
+    .reel::before, .reel::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 22%;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .reel::before { top: 0; background: linear-gradient(#f0dfbd, transparent); }
+    .reel::after { bottom: 0; background: linear-gradient(transparent, #f0dfbd); }
+    .reel-strip { will-change: transform; }
+    .reel-item {
+      height: var(--h);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 .4em;
+      font-size: calc(var(--h) * .55);
+      font-weight: 900;
+      letter-spacing: .08em;
+      white-space: nowrap;
+      color: var(--ink);
+    }
+    .reel-item.long { font-size: calc(var(--h) * .38); }
+    .reel-item.idle { color: #d8c39a; letter-spacing: .3em; }
+    .reel.win { animation: glow 1.4s ease-in-out infinite; }
+    .reel.win .reel-item { color: var(--red); }
+    @keyframes glow {
+      50% { box-shadow: inset 0 0 0 3px var(--gold), 0 0 0 6px rgba(232, 195, 106, .6), 0 0 40px 10px rgba(232, 195, 106, .55); }
+    }
+    .serial {
+      display: inline-block;
+      margin-bottom: 2vh;
+      padding: .2em 1em;
+      font-family: "Courier New", monospace;
+      font-size: clamp(22px, 3.2vw, 44px);
+      font-weight: bold;
+      letter-spacing: .25em;
+      color: var(--wine-2);
+      background: #fff3d6;
+      border: 2px dashed var(--gold-deep);
+      border-radius: 10px;
+    }
+    .serial-ph { height: calc(clamp(22px, 3.2vw, 44px) * 1.6); margin-bottom: 2vh; }
+
+    /* 得獎名單：金色票券 */
+    .winners { width: min(1100px, 100%); margin-top: 3vh; display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+    .ticket {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 22px;
+      color: var(--ink);
+      background: linear-gradient(180deg, #fff6d8, var(--gold));
+      border-radius: 10px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, .3);
+      font-size: clamp(16px, 2vw, 26px);
+      animation: chipIn .5s ease-out both;
+    }
+    .ticket .p { font-size: .8em; color: var(--wine-2); font-weight: 700; padding-right: 12px; border-right: 2px dashed var(--gold-deep); }
+    .ticket b { font-size: 1.2em; }
+    .ticket small { font-family: "Courier New", monospace; color: var(--wine-2); }
+    .final { flex-direction: column; align-items: center; margin: 3vh 0 1vh; }
+    .final .ticket { font-size: clamp(24px, 3.6vw, 48px); padding: 14px 34px; }
+    .done-title { font-size: clamp(28px, 4.4vw, 60px); font-weight: 900; color: var(--red); letter-spacing: .1em; }
+
+    .foot { margin-top: auto; padding-top: 3vh; font-size: 14px; }
+    .foot button { font: inherit; color: var(--gold-light); opacity: .6; background: none; border: 0; text-decoration: underline; cursor: pointer; }
+    .foot button:hover { opacity: 1; }
+    .demo { position: fixed; top: 10px; left: 10px; z-index: 5; padding: 3px 12px; font-size: 14px; color: var(--ink); background: var(--gold-light); border-radius: 6px; }
+
+    /* 彩帶 */
     .confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 10; }
-    .confetti span { position: absolute; top: -10vh; font-size: clamp(24px, 4vw, 48px); animation: fall linear forwards; }
-    @keyframes fall { to { transform: translateY(120vh) rotate(540deg); } }
-    .demo { position: fixed; top: 8px; left: 8px; padding: 2px 10px; font-size: 14px; color: #fff; background: #8f7d88; border-radius: 6px; }
+    .confetti i { position: absolute; top: -5vh; width: 12px; height: 18px; border-radius: 2px; animation: fall linear forwards; }
+    .confetti span { position: absolute; top: -8vh; font-size: clamp(26px, 3.5vw, 46px); animation: fall linear forwards; }
+    @keyframes fall { to { transform: translateY(115vh) rotate(720deg); } }
   </style>
 </head>
 <body>
+  <div class="sparkles" id="sparkles" aria-hidden="true"></div>
   <div class="page" id="app"></div>
   <script src="content/settings.js"></script>
   <script>
@@ -117,6 +312,7 @@
     const STORE_KEY = DEMO ? 'wedding-draw-demo' : 'wedding-draw-v1';
     const KEY_KEY = 'wedding-draw-key';
     const app = document.getElementById('app');
+    const couplePhoto = D.photo ? (D.photo.includes('/') ? D.photo : 'photos/' + D.photo) : '';
 
     // ---------- 狀態（存在這台電腦，不小心重新整理也不會掉） ----------
     function fresh() {
@@ -144,7 +340,7 @@
     function demoEntries() {
       const names = ['王小明', '陳美麗', '林志強', '張雅婷', '李大華', '黃怡君', '吳建宏', '劉佳穎', '蔡宗翰', '楊淑芬',
         '許家豪', '鄭雅雯', '謝文傑', '郭品妤', '洪志明', '曾郁婷', '邱冠宇', '廖婉婷', '賴俊傑', '周欣怡',
-        '葉承翰', '蘇芷涵', '莊子豪', '呂佩珊', '江柏翰', '何依婷', '羅國華', '高筱涵', '潘冠廷', '簡怡安'];
+        '葉承翰', '蘇芷涵', '莊子豪', '呂佩珊', '江柏翰', '何依婷', '羅國華', '高筱涵', '潘冠廷', '歐陽娜娜'];
       return names.map((name, i) => ({ name, serial: 'DEMO' + String.fromCharCode(65 + (i % 26)) + (i % 10), at: i }));
     }
 
@@ -172,7 +368,20 @@
 
     // ---------- 畫面 ----------
     function header(sub) {
-      return `<h1>${D.title}</h1><p class="sub">${sub}</p>${DEMO ? '<div class="demo">示範模式（假名單）</div>' : ''}`;
+      return `
+        <div class="head">
+          ${couplePhoto ? `<img class="couple" src="${esc(couplePhoto)}" alt="">` : ''}
+          <div>
+            <div class="script">${D.script || 'fen &amp; wei'}</div>
+            <h1>${titleHtml()}</h1>
+          </div>
+        </div>
+        <p class="sub">${sub}</p>
+        ${DEMO ? '<div class="demo">示範模式（假名單）</div>' : ''}`;
+    }
+    // 標題用金色漸層字，emoji 要另外包起來，不然會被塗成金色方塊
+    function titleHtml() {
+      return esc(D.title).replace(/(\p{Extended_Pictographic}️?)/gu, '<span class="emo">$1</span>');
     }
     function footer() {
       return `<div class="foot"><button type="button" id="resetAll">清除抽獎紀錄、從頭開始</button></div>`;
@@ -190,9 +399,9 @@
       app.innerHTML = `
         ${header('主持人專用')}
         <form class="card" id="login">
-          <p class="count-label">請輸入抽獎密碼</p>
+          <div class="label">請輸入抽獎密碼</div>
           <input type="password" id="key" autocomplete="off" value="${esc(key)}">
-          <div><button class="btn" type="submit">連線</button></div>
+          <div><button class="btn btn-gold" type="submit">連線</button></div>
           <p class="msg" id="msg"></p>
         </form>
         ${footer()}`;
@@ -200,6 +409,7 @@
         e.preventDefault();
         key = $('#key').value.trim();
         $('#msg').textContent = '連線中……';
+        $('#msg').className = 'msg muted';
         try {
           state.entries = await fetchEntries();
           try { sessionStorage.setItem(KEY_KEY, key); } catch (err) { /* ignore */ }
@@ -208,25 +418,30 @@
           render();
         } catch (err) {
           $('#msg').textContent = err.message;
+          $('#msg').className = 'msg';
         }
       });
       bindFooter();
     }
 
+    let shownCount = 0; // 數字從上次顯示的值往上跳
     function renderCollect() {
       clearInterval(render.timer);
-      const latest = state.entries.slice(-5).reverse().map((e) => esc(e.name)).join('、');
+      const latest = state.entries.slice(-8).reverse().map((e, i) =>
+        `<span class="chip" style="animation-delay:${i * 60}ms">${esc(e.name)}</span>`).join('');
       app.innerHTML = `
-        ${header('破關的賓客都在名單裡！')}
+        ${header('完成解謎的賓客，都有機會抽中紅包！')}
         <div class="card">
-          <div class="count">${state.entries.length}</div>
-          <div class="count-label">位賓客已破關</div>
-          <div class="ticker">${latest ? '最新破關：' + latest : '還沒有人破關……'}</div>
-          <button class="btn" type="button" id="freeze" ${state.entries.length ? '' : 'disabled'}>截止登記，開始抽獎</button>
+          <div class="count" id="count">${shownCount}</div>
+          <div class="label">位賓客已破關</div>
+          <div class="chips">${latest || '<span class="muted">還沒有人破關……</span>'}</div>
+          <button class="btn btn-gold" type="button" id="freeze" ${state.entries.length ? '' : 'disabled'}>截止登記，開始抽獎</button>
           <div><button class="btn btn-ghost btn-small" type="button" id="refresh">立即更新名單</button></div>
           <p class="msg" id="msg"></p>
         </div>
         ${footer()}`;
+      countUp($('#count'), shownCount, state.entries.length);
+      shownCount = state.entries.length;
       const refresh = async () => {
         if (refresh.busy) return;
         refresh.busy = true;
@@ -254,35 +469,70 @@
       if (!DEMO) render.timer = setInterval(refresh, 10000); // 每 10 秒自動更新
     }
 
+    function countUp(el, from, to) {
+      if (from === to) { el.textContent = to; return; }
+      const start = performance.now();
+      const dur = 900;
+      const step = (now) => {
+        const t = Math.min(1, (now - start) / dur);
+        el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - t, 3)));
+        if (t < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+
     const pool = () => state.entries.filter((e) =>
       !state.winners.some((w) => w.serial === e.serial) && !state.skipped.includes(e.serial));
     const prizeIndex = () => state.winners.length;
+    const nameClass = (name) => (String(name).length > 4 ? ' long' : '');
+
+    function ticket(w) {
+      return `<div class="ticket"><span class="p">${esc(w.prize)}</span><b>${esc(w.name)}</b><small>${esc(w.serial)}</small></div>`;
+    }
 
     function renderDraw() {
-      const done = prizeIndex() >= D.prizes.length;
+      const total = D.prizes.length;
+      const done = prizeIndex() >= total;
       const cur = state.current; // 剛抽出、還沒確認的得獎者
-      const prize = done ? '抽獎結束，恭喜得獎的賓客！' : D.prizes[prizeIndex()];
-      let stage = '<span class="muted">？？？</span>';
-      if (cur) stage = `<span>${esc(cur.name)}</span><span class="serial">序號 ${esc(cur.serial)}</span>`;
-      let actions = '';
-      if (!done && !cur) {
-        actions = `<button class="btn" type="button" id="go" ${pool().length ? '' : 'disabled'}>開始抽獎</button>`;
-      } else if (cur) {
-        actions = `
-          <button class="btn" type="button" id="confirm">恭喜！${prizeIndex() + 1 < D.prizes.length ? '下一個獎' : '完成'}</button>
-          <button class="btn btn-ghost" type="button" id="redraw">不在現場，重抽</button>`;
+      const winners = state.winners.map(ticket).join('');
+
+      if (done && !cur) {
+        app.innerHTML = `
+          ${header('恭喜以下得獎的賓客！')}
+          <div class="card">
+            <div class="done-title">🎉 抽獎結束 🎉</div>
+            <div class="winners final">${winners}</div>
+            <p class="muted">得獎的賓客請出示破關畫面截圖，核對序號後領取紅包</p>
+          </div>
+          ${footer()}`;
+        bindFooter();
+        return;
       }
-      const winners = state.winners.map((w) =>
-        `<div class="winner">${esc(w.prize)}：<b>${esc(w.name)}</b> <small>${esc(w.serial)}</small></div>`).join('');
+
+      const reelItem = cur
+        ? `<div class="reel-item${nameClass(cur.name)}">${esc(cur.name)}</div>`
+        : '<div class="reel-item idle">？？？</div>';
+      let actions;
+      if (cur) {
+        actions = `
+          <button class="btn btn-gold" type="button" id="confirm">恭喜！${prizeIndex() + 1 < total ? '下一個獎' : '完成'}</button>
+          <button class="btn btn-ghost" type="button" id="redraw">不在現場，重抽</button>`;
+      } else {
+        actions = `<button class="btn go" type="button" id="go" ${pool().length ? '' : 'disabled'}>開 始 抽 獎</button>`;
+      }
       app.innerHTML = `
         ${header(`共 ${state.entries.length} 位破關賓客參加抽獎`)}
         <div class="card">
-          <div class="prize">${esc(prize)}</div>
-          ${done && !cur ? `<div class="winners final">${winners}</div>` : `<div class="stage${cur ? ' win' : ''}" id="stage">${stage}</div>`}
+          <div class="prize-row">
+            <span class="prize">🧧 ${esc(D.prizes[prizeIndex()])}</span>
+            <span class="progress">${prizeIndex() + 1} / ${total}</span>
+          </div>
+          <div class="reel${cur ? ' win' : ''}" id="reel"><div class="reel-strip" id="strip">${reelItem}</div></div>
+          ${cur ? `<div class="serial">序號 ${esc(cur.serial)}</div>` : '<div class="serial-ph"></div>'}
           <div>${actions}</div>
-          <p class="msg">${!done && !cur && !pool().length ? '名單裡的人都抽過了' : ''}</p>
+          <p class="msg">${!cur && !pool().length ? '名單裡的人都抽過了' : ''}</p>
         </div>
-        ${winners && !done ? `<div class="winners">${winners}</div>` : ''}
+        ${winners ? `<div class="winners">${winners}</div>` : ''}
         ${footer()}`;
       if ($('#go')) $('#go').addEventListener('click', roll);
       if ($('#confirm')) $('#confirm').addEventListener('click', () => {
@@ -295,55 +545,75 @@
         state.skipped.push(state.current.serial);
         state.current = null;
         save();
+        render();
         roll();
       });
       bindFooter();
     }
 
-    // 名字快速跳動，越來越慢，最後停在得獎者
+    // 拉霸機：一長串名字往上捲，越來越慢，最後停在得獎者
     let rolling = false;
+    roll.id = 0;
     function roll() {
       const candidates = pool();
       if (!candidates.length || rolling) return;
       rolling = true;
       const winner = candidates[randInt(candidates.length)];
-      const btn = $('#go') || $('#redraw');
-      if (btn) btn.disabled = true;
-      const stageEl = $('#stage');
-      stageEl.className = 'stage rolling';
-      const start = performance.now();
-      const total = 4000;
-      const tick = () => {
-        const t = performance.now() - start;
-        if (t >= total) {
-          rolling = false;
-          state.current = { name: winner.name, serial: winner.serial };
-          save();
-          render();
-          confetti();
-          return;
-        }
-        const show = candidates.length > 1 ? candidates[randInt(candidates.length)] : winner;
-        stageEl.innerHTML = `<span>${esc(show.name)}</span>`;
-        setTimeout(tick, 50 + 400 * Math.pow(t / total, 3));
+      const go = $('#go');
+      if (go) { go.disabled = true; go.textContent = '抽 獎 中 …'; }
+
+      const seq = [];
+      for (let i = 0; i < 46; i++) {
+        let pick = candidates[randInt(candidates.length)];
+        if (candidates.length > 1 && seq.length && pick.name === seq[seq.length - 1].name) pick = candidates[(candidates.indexOf(pick) + 1) % candidates.length];
+        seq.push(pick);
+      }
+      seq.push(winner);
+      const strip = $('#strip');
+      strip.innerHTML = '<div class="reel-item idle">？？？</div>' +
+        seq.map((e) => `<div class="reel-item${nameClass(e.name)}">${esc(e.name)}</div>`).join('');
+      const h = strip.firstElementChild.offsetHeight;
+      strip.style.transform = 'translateY(0)';
+      void strip.offsetHeight;
+      strip.style.transition = 'transform 5.2s cubic-bezier(.12, .62, .08, 1)';
+      strip.style.transform = `translateY(${-seq.length * h}px)`;
+
+      const id = ++roll.id;
+      const finish = () => {
+        if (!rolling || id !== roll.id) return;
+        rolling = false;
+        state.current = { name: winner.name, serial: winner.serial };
+        save();
+        render();
+        confetti();
       };
-      tick();
+      strip.addEventListener('transitionend', finish, { once: true });
+      setTimeout(finish, 5600); // 萬一 transitionend 沒觸發
     }
 
     function confetti() {
       const box = document.createElement('div');
       box.className = 'confetti';
-      const icons = ['🎉', '💗', '🧧', '✨', '🎊'];
-      for (let i = 0; i < 40; i++) {
+      const colors = ['#e8c36a', '#fbe7b2', '#c62b3c', '#ff8fa3', '#ffffff'];
+      for (let i = 0; i < 90; i++) {
+        const p = document.createElement('i');
+        p.style.left = Math.random() * 100 + 'vw';
+        p.style.background = colors[i % colors.length];
+        p.style.animationDuration = 2.8 + Math.random() * 2.4 + 's';
+        p.style.animationDelay = Math.random() * 0.6 + 's';
+        p.style.transform = `rotate(${Math.random() * 180}deg)`;
+        box.appendChild(p);
+      }
+      for (let i = 0; i < 10; i++) {
         const s = document.createElement('span');
-        s.textContent = icons[i % icons.length];
+        s.textContent = i % 2 ? '🧧' : '🎉';
         s.style.left = Math.random() * 100 + 'vw';
-        s.style.animationDuration = 2.5 + Math.random() * 2.5 + 's';
+        s.style.animationDuration = 3 + Math.random() * 2 + 's';
         s.style.animationDelay = Math.random() * 0.8 + 's';
         box.appendChild(s);
       }
       document.body.appendChild(box);
-      setTimeout(() => box.remove(), 6000);
+      setTimeout(() => box.remove(), 7000);
     }
 
     function bindFooter() {
@@ -352,10 +622,25 @@
       b.addEventListener('click', () => {
         if (!confirm('確定要清除所有抽獎紀錄（包含已抽出的得獎者），從頭開始嗎？')) return;
         state = fresh();
+        shownCount = 0;
         save();
         render();
       });
     }
+
+    // 背景的金色光點
+    (function sparkles() {
+      const box = document.getElementById('sparkles');
+      for (let i = 0; i < 28; i++) {
+        const s = document.createElement('i');
+        s.style.left = Math.random() * 100 + 'vw';
+        const size = 3 + Math.random() * 5;
+        s.style.width = s.style.height = size + 'px';
+        s.style.animationDuration = 9 + Math.random() * 10 + 's';
+        s.style.animationDelay = -Math.random() * 15 + 's';
+        box.appendChild(s);
+      }
+    })();
 
     // 空白鍵也可以抽（主持人拿簡報筆、鍵盤都方便）
     document.addEventListener('keydown', (e) => {
