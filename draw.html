@@ -372,7 +372,9 @@
           : '讀不到名單，請按「重新連線」再試一次（一直不行的話，檢查網路或 Apps Script 是否部署成新版）');
       }
       if (!data.ok && data.error === 'key') {
-        throw new Error(key ? '密碼不對' : 'Apps Script 還在要求密碼：請換上新版程式（DRAW_KEY 留空）並重新部署');
+        const err = new Error(key ? '密碼不對' : '這個抽獎頁需要輸入密碼');
+        err.code = 'key';
+        throw err;
       }
       if (!data.ok) throw new Error('讀取失敗');
       // 名字和序號都一樣才算同一個人（兩人剛好撞號時兩個都算）
@@ -410,9 +412,9 @@
 
     function renderLogin() {
       if (DEMO) { state.entries = demoEntries(); state.phase = 'collect'; save(); return render(); }
-      // 設定檔有 key 欄位（留空 = 不需要密碼）的話，打開就自動連線
-      const auto = typeof D.key === 'string';
-      if (auto) key = D.key;
+      // 一律先自動連線（不需要密碼）；Apps Script 有設密碼、回「密碼不對」時才顯示輸入框
+      const auto = !renderLogin.needKey;
+      if (auto) key = D.key || key || '';
       app.innerHTML = `
         ${header('主持人專用')}
         <form class="card" id="login">
@@ -442,6 +444,14 @@
           save();
           render();
         } catch (err) {
+          clearTimeout(slow);
+          if (err.code === 'key' && auto) {
+            // Apps Script 有設密碼：改成顯示密碼輸入框
+            renderLogin.needKey = true;
+            renderLogin();
+            $('#msg').textContent = err.message;
+            return;
+          }
           $('#msg').textContent = err.message;
           $('#msg').className = 'msg';
           btn.hidden = false;
