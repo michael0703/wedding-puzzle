@@ -101,14 +101,14 @@ window.SETTINGS = {
   // 留言板（顯示順序就是這裡的順序）
   // 加上 showIf: 'order' 的留言，要解開該關卡後才會出現（謎題 3 的線索）
   guestbook: [
-    { showIf: 'order', name: '小美', avatar: '👧', date: '2012/01/08 22:31', text: '我記得！演那個反派的人，同一年也演了薩諾斯耶！', reply: '小美妳記性也太好' },
-    { showIf: 'order', name: '阿凱', avatar: '🧢', date: '2012/01/08 21:47', text: '電影裡有一個全身鋼鐵、銀銀的大塊頭，超帥', reply: '對！我也記得他' },
-    { showIf: 'order', name: '學長', avatar: '😎', date: '2012/01/08 21:20', text: '主角根本殺不死，手斷掉還會自己長回來 = =', reply: '那一段真的看到傻眼' },
-    { showIf: 'order', name: '阿明', avatar: '🤓', date: '2012/01/08 20:55', text: '他都穿紅色緊身衣，說這樣流血別人才看不出來', reply: '這個梗我笑超久' },
-    { showIf: 'order', name: '小胖', avatar: '🐷', date: '2012/01/08 20:12', text: '你們看的那部喔？主角講話跟威威你一樣好笑，整部都在講幹話 XDD', reply: '對對對就是那部！' },
-    { name: '芬芬', avatar: '🐟', date: '2011/11/05 14:20', text: '威威 筆記借我抄一下 拜託 QQ', reply: '你上次借的還沒還耶 = =' },
+    { showIf: 'order', name: '小美', avatar: '👧', date: '2018/05/18 23:41', text: '我記得！演那個反派的人，同一年也演了薩諾斯耶！', reply: '小美妳記性也太好' },
+    { showIf: 'order', name: '阿凱', avatar: '🧢', date: '2018/05/18 23:02', text: '電影裡有一個全身鋼鐵、銀銀的大塊頭，超帥', reply: '對！我也記得他' },
+    { showIf: 'order', name: '學長', avatar: '😎', date: '2018/05/18 22:35', text: '主角根本殺不死，手斷掉還會自己長回來 = =', reply: '那一段真的看到傻眼' },
+    { showIf: 'order', name: '阿明', avatar: '🤓', date: '2018/05/18 21:50', text: '他都穿紅色緊身衣，說這樣流血別人才看不出來', reply: '這個梗我笑超久' },
+    { showIf: 'order', name: '小胖', avatar: '🐷', date: '2018/05/18 20:31', text: '你們看的那部喔？主角講話跟威威你一樣好笑，整部都在講幹話 XDD', reply: '對對對就是那部！' },
+    { name: '芬芬', avatar: '🐟', date: '2018/05/10 14:20', text: '威威 筆記借我抄一下 拜託 QQ', reply: '你上次借的還沒還耶 = =' },
+    { name: '芬芬', avatar: '🐟', date: '2018/05/06 22:48', text: '下次換你請客喔！', reply: '好啦好啦 (錢包哭哭)' },
     { name: '(悄悄話)', avatar: '🔒', date: '2011/10/20 23:05', private: true, text: '此留言為悄悄話，僅版主可以閱讀。' },
-    { name: '芬芬', avatar: '🐟', date: '2011/10/02 22:48', text: '下次換你請客喔！', reply: '好啦好啦 (錢包哭哭)' },
     { name: '小胖', avatar: '🐷', date: '2011/05/03 12:01', text: '版主好～來踩踩 有空回踩喔!!', reply: '踩回去了 XD' },
   ],
 
