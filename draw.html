@@ -151,7 +151,17 @@
     async function fetchEntries() {
       if (DEMO) return demoEntries();
       if (!S.sheetUrl) throw new Error('settings.js 還沒設定 sheetUrl');
-      const r = await fetch(S.sheetUrl, { method: 'POST', body: JSON.stringify({ action: 'list', key }) });
+      // Google 偶爾會卡住不回應：15 秒沒回應就放棄，讓主持人再按一次
+      const ctl = new AbortController();
+      const timer = setTimeout(() => ctl.abort(), 15000);
+      let r;
+      try {
+        r = await fetch(S.sheetUrl, { method: 'POST', body: JSON.stringify({ action: 'list', key }), signal: ctl.signal });
+      } catch (e) {
+        throw new Error(e.name === 'AbortError' ? 'Google 沒有回應，請再按一次' : '連線失敗，請檢查網路後再試一次');
+      } finally {
+        clearTimeout(timer);
+      }
       let data;
       try { data = await r.json(); } catch (e) { throw new Error('讀不到名單：Apps Script 可能還沒更新成新版並重新部署'); }
       if (!data.ok) throw new Error(data.error === 'key' ? '密碼不對（或 Apps Script 還沒設定 DRAW_KEY）' : '讀取失敗');
@@ -204,6 +214,7 @@
     }
 
     function renderCollect() {
+      clearInterval(render.timer);
       const latest = state.entries.slice(-5).reverse().map((e) => esc(e.name)).join('、');
       app.innerHTML = `
         ${header('破關的賓客都在名單裡！')}
@@ -217,6 +228,8 @@
         </div>
         ${footer()}`;
       const refresh = async () => {
+        if (refresh.busy) return;
+        refresh.busy = true;
         try {
           state.entries = await fetchEntries();
           save();
@@ -224,6 +237,8 @@
         } catch (err) {
           const m = $('#msg');
           if (m) m.textContent = err.message;
+        } finally {
+          refresh.busy = false;
         }
       };
       $('#refresh').addEventListener('click', refresh);
