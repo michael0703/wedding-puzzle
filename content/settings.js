@@ -138,5 +138,11 @@ window.SETTINGS = {
 
   // 抽獎登記：Google Apps Script 部署後的網址（設定方式見 README）
   // 留空的話，序號只會顯示在手機上，不會上傳
+  // 抽獎頁（draw.html）：每個獎項的名稱，照順序抽，數量就是名額
+  draw: {
+    title: '🧧 破關抽紅包 🧧',
+    prizes: ['第 1 個紅包', '第 2 個紅包', '第 3 個紅包'],
+  },
+
   sheetUrl: 'https://script.google.com/macros/s/AKfycbwL7-2Xk4-10XwAr422-dJFmVbjOOjRFCtfYGJJvPyda75WYgTA1wBM05qMjXV_ny8y/exec',
 };

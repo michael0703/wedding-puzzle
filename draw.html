@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>破關抽獎</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧧</text></svg>">
+  <style>
+    /* 投影用抽獎頁：字要大、對比要夠，遠遠的賓客也看得到 */
+    :root {
+      --pink: #ff5fa2;
+      --pink-deep: #e0337e;
+      --pink-soft: #ffe3f0;
+      --gold: #f0b400;
+      --ink: #4a3b44;
+      --muted: #8f7d88;
+      --line: #f7a8cb;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Noto Serif TC", "PMingLiU", "新細明體", "Songti TC", serif;
+      background-color: #ffeef6;
+      background-image:
+        radial-gradient(#ffffff 3px, transparent 3.5px),
+        radial-gradient(#ffd1e6 3px, transparent 3.5px);
+      background-size: 44px 44px;
+      background-position: 0 0, 22px 22px;
+      overflow-x: hidden;
+    }
+    .page { min-height: 100%; display: flex; flex-direction: column; align-items: center; padding: 3vh 16px 2vh; text-align: center; }
+    h1 { margin: 0 0 1vh; font-size: clamp(32px, 6vw, 72px); color: var(--pink-deep); text-shadow: 2px 2px 0 #fff; }
+    .sub { margin: 0; font-size: clamp(16px, 2.2vw, 28px); color: var(--muted); }
+    .card {
+      width: min(1100px, 100%);
+      margin-top: 3vh;
+      padding: 4vh 3vw;
+      background: #fff;
+      border: 6px double var(--line);
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(224, 51, 126, .15);
+    }
+    .btn {
+      font: inherit;
+      font-size: clamp(18px, 2.4vw, 30px);
+      font-weight: bold;
+      padding: .5em 1.4em;
+      margin: 8px;
+      color: #fff;
+      background: linear-gradient(#ff7ab5, var(--pink-deep));
+      border: 0;
+      border-radius: 999px;
+      box-shadow: 0 4px 0 #b0005a;
+      cursor: pointer;
+    }
+    .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #b0005a; }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-ghost { color: var(--pink-deep); background: #fff; border: 2px solid var(--line); box-shadow: none; }
+    .btn-small { font-size: 15px; padding: .4em 1em; }
+    input {
+      font: inherit;
+      font-size: 22px;
+      padding: .4em .8em;
+      border: 2px solid var(--line);
+      border-radius: 12px;
+      width: min(320px, 100%);
+      text-align: center;
+    }
+    .muted { color: var(--muted); }
+    .msg { min-height: 1.6em; color: #d0342c; font-size: 18px; }
+    .count { font-size: clamp(64px, 14vw, 180px); font-weight: bold; color: var(--pink-deep); line-height: 1.1; }
+    .count-label { font-size: clamp(20px, 3vw, 38px); }
+    .ticker { margin: 2vh 0; font-size: clamp(16px, 2vw, 26px); color: var(--muted); min-height: 1.5em; }
+    .prize { display: inline-block; padding: .2em 1em; font-size: clamp(22px, 3.4vw, 44px); font-weight: bold; color: #8a5a00; background: #fff6d6; border: 3px solid var(--gold); border-radius: 999px; }
+    .stage {
+      margin: 3vh auto;
+      min-height: 2.2em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(48px, 10vw, 150px);
+      font-weight: bold;
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+    }
+    .stage.rolling { color: var(--muted); }
+    .stage.win { color: var(--pink-deep); animation: pop .5s ease-out; }
+    .serial { font-family: "Courier New", monospace; font-size: clamp(22px, 3.4vw, 46px); letter-spacing: .2em; color: var(--ink); margin-top: .3em; }
+    @keyframes pop { 0% { transform: scale(.6); } 70% { transform: scale(1.08); } 100% { transform: scale(1); } }
+    .winners { width: min(1100px, 100%); margin-top: 3vh; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+    .winner { padding: 10px 18px; background: #fff; border: 2px dashed var(--line); border-radius: 12px; font-size: clamp(16px, 2vw, 24px); }
+    .winner b { color: var(--pink-deep); }
+    .winners.final { flex-direction: column; align-items: center; margin: 3vh 0 1vh; }
+    .winners.final .winner { font-size: clamp(24px, 4vw, 52px); border-style: solid; }
+    .winner small { font-family: "Courier New", monospace; color: var(--muted); }
+    .foot { margin-top: auto; padding-top: 3vh; font-size: 14px; color: var(--muted); }
+    .foot button { font: inherit; color: var(--muted); background: none; border: 0; text-decoration: underline; cursor: pointer; }
+    .confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 10; }
+    .confetti span { position: absolute; top: -10vh; font-size: clamp(24px, 4vw, 48px); animation: fall linear forwards; }
+    @keyframes fall { to { transform: translateY(120vh) rotate(540deg); } }
+    .demo { position: fixed; top: 8px; left: 8px; padding: 2px 10px; font-size: 14px; color: #fff; background: #8f7d88; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <div class="page" id="app"></div>
+  <script src="content/settings.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    const S = window.SETTINGS;
+    const D = S.draw || { title: '抽獎', prizes: ['第 1 個紅包'] };
+    const DEMO = /[?&]demo\b/.test(location.search);
+    const STORE_KEY = DEMO ? 'wedding-draw-demo' : 'wedding-draw-v1';
+    const KEY_KEY = 'wedding-draw-key';
+    const app = document.getElementById('app');
+
+    // ---------- 狀態（存在這台電腦，不小心重新整理也不會掉） ----------
+    function fresh() {
+      return { phase: 'login', entries: [], frozenAt: null, winners: [], skipped: [], current: null };
+    }
+    function load() {
+      try { return Object.assign(fresh(), JSON.parse(localStorage.getItem(STORE_KEY) || '{}')); } catch (e) { return fresh(); }
+    }
+    function save() {
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+    }
+    let state = load();
+    let key = '';
+    try { key = sessionStorage.getItem(KEY_KEY) || ''; } catch (e) { /* ignore */ }
+
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const $ = (sel) => app.querySelector(sel);
+    function randInt(n) {
+      const buf = new Uint32Array(1);
+      crypto.getRandomValues(buf);
+      return buf[0] % n;
+    }
+
+    // ---------- 讀名單 ----------
+    function demoEntries() {
+      const names = ['王小明', '陳美麗', '林志強', '張雅婷', '李大華', '黃怡君', '吳建宏', '劉佳穎', '蔡宗翰', '楊淑芬',
+        '許家豪', '鄭雅雯', '謝文傑', '郭品妤', '洪志明', '曾郁婷', '邱冠宇', '廖婉婷', '賴俊傑', '周欣怡',
+        '葉承翰', '蘇芷涵', '莊子豪', '呂佩珊', '江柏翰', '何依婷', '羅國華', '高筱涵', '潘冠廷', '簡怡安'];
+      return names.map((name, i) => ({ name, serial: 'DEMO' + String.fromCharCode(65 + (i % 26)) + (i % 10), at: i }));
+    }
+
+    async function fetchEntries() {
+      if (DEMO) return demoEntries();
+      if (!S.sheetUrl) throw new Error('settings.js 還沒設定 sheetUrl');
+      const r = await fetch(S.sheetUrl, { method: 'POST', body: JSON.stringify({ action: 'list', key }) });
+      let data;
+      try { data = await r.json(); } catch (e) { throw new Error('讀不到名單：Apps Script 可能還沒更新成新版並重新部署'); }
+      if (!data.ok) throw new Error(data.error === 'key' ? '密碼不對（或 Apps Script 還沒設定 DRAW_KEY）' : '讀取失敗');
+      // 同一個序號只算一次
+      const seen = new Set();
+      return data.entries.filter((e) => e.serial && !seen.has(e.serial) && seen.add(e.serial));
+    }
+
+    // ---------- 畫面 ----------
+    function header(sub) {
+      return `<h1>${D.title}</h1><p class="sub">${sub}</p>${DEMO ? '<div class="demo">示範模式（假名單）</div>' : ''}`;
+    }
+    function footer() {
+      return `<div class="foot"><button type="button" id="resetAll">清除抽獎紀錄、從頭開始</button></div>`;
+    }
+
+    function render() {
+      clearInterval(render.timer);
+      if (state.phase === 'login') return renderLogin();
+      if (state.phase === 'collect') return renderCollect();
+      return renderDraw();
+    }
+
+    function renderLogin() {
+      if (DEMO) { state.entries = demoEntries(); state.phase = 'collect'; save(); return render(); }
+      app.innerHTML = `
+        ${header('主持人專用')}
+        <form class="card" id="login">
+          <p class="count-label">請輸入抽獎密碼</p>
+          <input type="password" id="key" autocomplete="off" value="${esc(key)}">
+          <div><button class="btn" type="submit">連線</button></div>
+          <p class="msg" id="msg"></p>
+        </form>
+        ${footer()}`;
+      $('#login').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        key = $('#key').value.trim();
+        $('#msg').textContent = '連線中……';
+        try {
+          state.entries = await fetchEntries();
+          try { sessionStorage.setItem(KEY_KEY, key); } catch (err) { /* ignore */ }
+          state.phase = 'collect';
+          save();
+          render();
+        } catch (err) {
+          $('#msg').textContent = err.message;
+        }
+      });
+      bindFooter();
+    }
+
+    function renderCollect() {
+      const latest = state.entries.slice(-5).reverse().map((e) => esc(e.name)).join('、');
+      app.innerHTML = `
+        ${header('破關的賓客都在名單裡！')}
+        <div class="card">
+          <div class="count">${state.entries.length}</div>
+          <div class="count-label">位賓客已破關</div>
+          <div class="ticker">${latest ? '最新破關：' + latest : '還沒有人破關……'}</div>
+          <button class="btn" type="button" id="freeze" ${state.entries.length ? '' : 'disabled'}>截止登記，開始抽獎</button>
+          <div><button class="btn btn-ghost btn-small" type="button" id="refresh">立即更新名單</button></div>
+          <p class="msg" id="msg"></p>
+        </div>
+        ${footer()}`;
+      const refresh = async () => {
+        try {
+          state.entries = await fetchEntries();
+          save();
+          if (state.phase === 'collect') renderCollect();
+        } catch (err) {
+          const m = $('#msg');
+          if (m) m.textContent = err.message;
+        }
+      };
+      $('#refresh').addEventListener('click', refresh);
+      $('#freeze').addEventListener('click', async () => {
+        await refresh();
+        if (!confirm(`確定截止登記嗎？\n目前共 ${state.entries.length} 人，截止後再登記的就不算了。`)) return;
+        state.phase = 'draw';
+        state.frozenAt = Date.now();
+        save();
+        render();
+      });
+      bindFooter();
+      if (!DEMO) render.timer = setInterval(refresh, 10000); // 每 10 秒自動更新
+    }
+
+    const pool = () => state.entries.filter((e) =>
+      !state.winners.some((w) => w.serial === e.serial) && !state.skipped.includes(e.serial));
+    const prizeIndex = () => state.winners.length;
+
+    function renderDraw() {
+      const done = prizeIndex() >= D.prizes.length;
+      const cur = state.current; // 剛抽出、還沒確認的得獎者
+      const prize = done ? '抽獎結束，恭喜得獎的賓客！' : D.prizes[prizeIndex()];
+      let stage = '<span class="muted">？？？</span>';
+      if (cur) stage = `<span>${esc(cur.name)}</span><span class="serial">序號 ${esc(cur.serial)}</span>`;
+      let actions = '';
+      if (!done && !cur) {
+        actions = `<button class="btn" type="button" id="go" ${pool().length ? '' : 'disabled'}>開始抽獎</button>`;
+      } else if (cur) {
+        actions = `
+          <button class="btn" type="button" id="confirm">恭喜！${prizeIndex() + 1 < D.prizes.length ? '下一個獎' : '完成'}</button>
+          <button class="btn btn-ghost" type="button" id="redraw">不在現場，重抽</button>`;
+      }
+      const winners = state.winners.map((w) =>
+        `<div class="winner">${esc(w.prize)}：<b>${esc(w.name)}</b> <small>${esc(w.serial)}</small></div>`).join('');
+      app.innerHTML = `
+        ${header(`共 ${state.entries.length} 位破關賓客參加抽獎`)}
+        <div class="card">
+          <div class="prize">${esc(prize)}</div>
+          ${done && !cur ? `<div class="winners final">${winners}</div>` : `<div class="stage${cur ? ' win' : ''}" id="stage">${stage}</div>`}
+          <div>${actions}</div>
+          <p class="msg">${!done && !cur && !pool().length ? '名單裡的人都抽過了' : ''}</p>
+        </div>
+        ${winners && !done ? `<div class="winners">${winners}</div>` : ''}
+        ${footer()}`;
+      if ($('#go')) $('#go').addEventListener('click', roll);
+      if ($('#confirm')) $('#confirm').addEventListener('click', () => {
+        state.winners.push(Object.assign({ prize: D.prizes[prizeIndex()] }, state.current));
+        state.current = null;
+        save();
+        render();
+      });
+      if ($('#redraw')) $('#redraw').addEventListener('click', () => {
+        state.skipped.push(state.current.serial);
+        state.current = null;
+        save();
+        roll();
+      });
+      bindFooter();
+    }
+
+    // 名字快速跳動，越來越慢，最後停在得獎者
+    let rolling = false;
+    function roll() {
+      const candidates = pool();
+      if (!candidates.length || rolling) return;
+      rolling = true;
+      const winner = candidates[randInt(candidates.length)];
+      const btn = $('#go') || $('#redraw');
+      if (btn) btn.disabled = true;
+      const stageEl = $('#stage');
+      stageEl.className = 'stage rolling';
+      const start = performance.now();
+      const total = 4000;
+      const tick = () => {
+        const t = performance.now() - start;
+        if (t >= total) {
+          rolling = false;
+          state.current = { name: winner.name, serial: winner.serial };
+          save();
+          render();
+          confetti();
+          return;
+        }
+        const show = candidates.length > 1 ? candidates[randInt(candidates.length)] : winner;
+        stageEl.innerHTML = `<span>${esc(show.name)}</span>`;
+        setTimeout(tick, 50 + 400 * Math.pow(t / total, 3));
+      };
+      tick();
+    }
+
+    function confetti() {
+      const box = document.createElement('div');
+      box.className = 'confetti';
+      const icons = ['🎉', '💗', '🧧', '✨', '🎊'];
+      for (let i = 0; i < 40; i++) {
+        const s = document.createElement('span');
+        s.textContent = icons[i % icons.length];
+        s.style.left = Math.random() * 100 + 'vw';
+        s.style.animationDuration = 2.5 + Math.random() * 2.5 + 's';
+        s.style.animationDelay = Math.random() * 0.8 + 's';
+        box.appendChild(s);
+      }
+      document.body.appendChild(box);
+      setTimeout(() => box.remove(), 6000);
+    }
+
+    function bindFooter() {
+      const b = document.getElementById('resetAll');
+      if (!b) return;
+      b.addEventListener('click', () => {
+        if (!confirm('確定要清除所有抽獎紀錄（包含已抽出的得獎者），從頭開始嗎？')) return;
+        state = fresh();
+        save();
+        render();
+      });
+    }
+
+    // 空白鍵也可以抽（主持人拿簡報筆、鍵盤都方便）
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== ' ' || e.target.tagName === 'INPUT') return;
+      const b = $('#go');
+      if (b && !b.disabled) { e.preventDefault(); b.click(); }
+    });
+
+    render();
+  })();
+  </script>
+</body>
+</html>
