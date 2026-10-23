@@ -9,13 +9,13 @@ window.SETTINGS = {
   blogTitle: '威威の小天地',
   blogSubtitle: '~*歡迎光臨我的小窩*~ 有來就留言，留言必回踩 ^^',
   marquee: '☆ 歡迎光臨威威の小天地 ☆ 留言板記得留言喔 ☆ 上鎖的東西不要偷看啦 (/ω＼) ☆',
-  visitors: { today: 128, total: 5201314 },
+  visitors: { today: 1107, total: 20180529 },
 
   intro: {
-    title: '你發現了一個很久以前的網誌……',
+    title: '你發現了新郎的網誌……',
     html:
-      '這是新郎<b>威威</b>大學時寫的網誌，已經很多年沒更新了。<br><br>' +
-      '聽說他在裡面藏了一篇上鎖的文章，是寫給新娘<b>芬芬</b>的。<br>' +
+      '這是新郎<b>威威</b>的網誌，記錄了他跟<b>芬芬</b>的大小事。<br><br>' +
+      '聽說他在裡面藏了一篇上鎖的文章，解開會有驚喜！<br>' +
       '仔細讀他的網誌、翻翻他的相簿，找出密碼，打開置頂的那篇文章吧！<br><br>' +
       '🔑 總共有 3 道關卡<br>' +
       '💡 卡住的話，右下角隨時可以看提示<br>' +
@@ -53,7 +53,7 @@ window.SETTINGS = {
     },
     final: {
       type: 'text',
-      name: '置頂文章〈給未來的妳〉',
+      name: '置頂文章〈感謝的話〉',
       where: '#/post/letter',
       prompt: '這篇文章已加密 🔒<br>密碼：我們第一次一起看的電影<br><small>（英文片名）</small>',
       answers: ['deadpool2', '死侍2'], // 比對時不分大小寫、忽略空格
@@ -84,17 +84,6 @@ window.SETTINGS = {
       sortLock: 'order',
       solvedNote: '相簿的最後一頁，多了一行小字：「網誌裡有一篇新文章，留言板也有新留言，去看看吧。」',
     },
-    {
-      id: 'club',
-      title: '社團出遊',
-      cover: '🏕️',
-      desc: '2011 暑假・墾丁',
-      photos: [
-        { ph: '🏖️', caption: '社團墾丁之旅，學長又在亂買東西' },
-        { ph: '🌅', caption: '說好早起看日出，結果大家都睡過頭' },
-        { ph: '🎸', caption: '迎新晚會，有人表演吉他' },
-      ],
-    },
   ],
 
   // ---------- 行事曆（謎題 1：把文章裡的日期點上去，會排出字） ----------
@@ -117,10 +106,9 @@ window.SETTINGS = {
     { showIf: 'order', name: '學長', avatar: '😎', date: '2012/01/08 21:20', text: '主角根本殺不死，手斷掉還會自己長回來 = =', reply: '那一段真的看到傻眼' },
     { showIf: 'order', name: '阿明', avatar: '🤓', date: '2012/01/08 20:55', text: '他都穿紅色緊身衣，說這樣流血別人才看不出來', reply: '這個梗我笑超久' },
     { showIf: 'order', name: '小胖', avatar: '🐷', date: '2012/01/08 20:12', text: '你們看的那部喔？主角講話跟威威你一樣好笑，整部都在講幹話 XDD', reply: '對對對就是那部！' },
-    { name: '阿明', avatar: '🤓', date: '2011/11/05 14:20', text: '威威 筆記借我抄一下 拜託 QQ', reply: '你上次借的還沒還耶 = =' },
+    { name: '芬芬', avatar: '🐟', date: '2011/11/05 14:20', text: '威威 筆記借我抄一下 拜託 QQ', reply: '你上次借的還沒還耶 = =' },
     { name: '(悄悄話)', avatar: '🔒', date: '2011/10/20 23:05', private: true, text: '此留言為悄悄話，僅版主可以閱讀。' },
     { name: '芬芬', avatar: '🐟', date: '2011/10/02 22:48', text: '下次換你請客喔！', reply: '好啦好啦 (錢包哭哭)' },
-    { name: '學長', avatar: '😎', date: '2011/07/20 09:30', text: '學弟 墾丁的照片什麼時候上傳啦', reply: '學長～已經放在相簿了！' },
     { name: '小胖', avatar: '🐷', date: '2011/05/03 12:01', text: '版主好～來踩踩 有空回踩喔!!', reply: '踩回去了 XD' },
   ],
 
@@ -137,23 +125,18 @@ window.SETTINGS = {
       ['喜歡吃的食物', '炒飯、水餃、滷肉飯<br>唯一會吃的甜食是鬆餅'],
     ],
     about: '',
-    friends: ['🐟 芬芬', '😎 學長', '🐷 小胖', '🤓 阿明', '🧢 阿凱', '👧 小美'],
   },
 
-  // ---------- 破關後 ----------
+  // ---------- 破關後（置頂文章最下面：抽獎登記 → 影片 → 喜帖） ----------
   ending: {
-    title: '很多年以後……',
-    html:
-      '這篇文章，她後來真的看到了。<br><br>' +
-      '今天，我們結婚了。<br><br>' +
-      '謝謝你陪我們解開這個藏了好多年的秘密，<br>' +
-      '也謝謝你今天來到這裡，見證我們的幸福 💍',
-    sign: '—— 威威 &amp; 芬芬',
     // YouTube 影片網址最後那串 ID，例如 https://youtu.be/AbCdEf12345 → 'AbCdEf12345'
+    // 留空就不顯示影片
     youtubeId: '',
+    // 放在最後的照片（放在 photos/ 資料夾）
+    photo: 'invitation.jpg',
   },
 
   // 抽獎登記：Google Apps Script 部署後的網址（設定方式見 README）
   // 留空的話，序號只會顯示在手機上，不會上傳
-  sheetUrl: '',
+  sheetUrl: 'https://script.google.com/macros/s/AKfycbwL7-2Xk4-10XwAr422-dJFmVbjOOjRFCtfYGJJvPyda75WYgTA1wBM05qMjXV_ny8y/exec',
 };

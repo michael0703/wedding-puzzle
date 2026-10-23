@@ -196,7 +196,7 @@
           <main id="main"><p class="muted">載入中……</p></main>
           <aside id="side"></aside>
         </div>
-        <footer class="foot">© 2011 ${S.blogTitle}・本網誌最佳瀏覽解析度 1024×768</footer>
+        <footer class="foot">© 2018 ${S.blogTitle}・本網誌最佳瀏覽解析度 1024×768</footer>
       </div>
       <button type="button" class="hint-fab" id="hintFab">💡 卡住了嗎？</button>
       <div class="modal" id="modal" hidden><div class="modal-card" role="dialog" aria-modal="true"></div></div>
@@ -242,10 +242,6 @@
       <section class="box">
         <h3>☆ 最新留言</h3>
         <ul class="plain">${latest}</ul>
-      </section>
-      <section class="box">
-        <h3>☆ 好友名單</h3>
-        <ul class="plain">${P.friends.map((f) => `<li>${f}</li>`).join('')}</ul>
       </section>
       <section class="box">
         <h3>☆ 人氣</h3>
@@ -538,14 +534,15 @@
     const E = S.ending;
     const video = E.youtubeId
       ? `<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(E.youtubeId)}" title="感謝影片" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`
-      : '<div class="video video-ph">🎬<br>感謝影片（待放上）</div>';
+      : '';
+    const photo = E.photo
+      ? `<img class="ending-photo" src="${E.photo.includes('/') ? E.photo : 'photos/' + E.photo}" alt="喜帖" loading="lazy">`
+      : '';
     return `
       <section class="ending">
-        <h3>${E.title}</h3>
-        ${video}
-        <p>${E.html}</p>
-        <p class="sign">${E.sign}</p>
         ${state.claim ? certificate() : claimForm()}
+        ${video}
+        ${photo}
       </section>`;
   }
 
@@ -862,7 +859,7 @@
     }
     const card = openModal(`
       <h3>💡 提示</h3>
-      <p class="small">目標：解開置頂文章〈給未來的妳〉。選一個你卡住的地方：</p>
+      <p class="small">目標：解開${S.locks[S.finalLock].name}。選一個你卡住的地方：</p>
       <div class="htabs">${tabs}</div>
       ${state.solved[lockId] ? '<p class="small ok">這一關已經解開了 👍</p>' : ''}
       <div class="hints">${shown || '<p class="small muted">先自己找找看，真的想不到再點下面的按鈕 ^^</p>'}</div>
