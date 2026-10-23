@@ -713,7 +713,7 @@
         <div class="profile-avatar">${P.avatar}</div>
         <table class="profile-table">${rows}</table>
       </div>
-      <p>${P.about}</p>
+      ${P.about ? `<p>${P.about}</p>` : ''}
       <p class="reset-row"><button type="button" class="link-btn" id="resetBtn">重新開始遊戲</button></p>`;
   }
 
