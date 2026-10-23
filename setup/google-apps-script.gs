@@ -30,7 +30,8 @@ function doPost(e) {
 
 // 抽獎頁用：密碼正確才回傳名單（名字、序號、登記時間）
 function listEntries(key) {
-  if (DRAW_KEY === '請改成你自己的密碼' || key !== DRAW_KEY) return json({ ok: false, error: 'key' });
+  // 還沒改密碼就一律拒絕（用 startsWith，避免「全部取代」把這行也換掉）
+  if (!DRAW_KEY || DRAW_KEY.startsWith('請改成') || key !== DRAW_KEY) return json({ ok: false, error: 'key' });
   const sheet = getSheet();
   const rows = sheet.getLastRow() - 1;
   const values = rows > 0 ? sheet.getRange(2, 1, rows, 3).getValues() : [];
