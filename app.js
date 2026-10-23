@@ -289,7 +289,7 @@
       return `
         <article class="post-card">
           <div class="post-meta">${p.date}・心情 ${p.mood}</div>
-          <h2 class="post-title"><a href="#/post/${p.id}">${p.pinned ? '<span class="pin">[置頂]</span> ' : ''}${locked ? '🔒 ' : ''}${p.title}</a></h2>
+          <h2 class="post-title"><a href="#/post/${p.id}">${p.pinned ? '<span class="pin">[置頂]</span> ' : ''}${locked ? '🔒 ' : ''}${p.title}</a>${p.showIf ? ' <span class="news-badge">NEW!</span>' : ''}</h2>
           <p class="excerpt">${excerpt}</p>
           <a class="more" href="#/post/${p.id}">繼續閱讀 »</a>
         </article>`;
@@ -334,7 +334,14 @@
     if (isLocked(a.lock)) {
       body = lockBox(a.lock);
     } else if (a.sortLock && isLocked(a.sortLock)) {
-      body = sortBox(a.sortLock);
+      // 解開相簿時網誌也多了文章：在排序謎題上方提醒玩家去看
+      const news = POSTS.filter((p) => p.showIf === a.lock).length;
+      body = (news ? `
+        <a class="news-note" href="#/">
+          <span class="news-badge">NEW!</span>
+          網誌多了 <b>${news} 篇新文章</b>！照片的順序，線索可能就藏在裡面……
+          <span class="news-go">去看看 »</span>
+        </a>` : '') + sortBox(a.sortLock);
     } else if (a.sortLock) {
       body = `<p class="solved-note">${a.solvedNote || ''}</p>` + photoGrid(SORT.answer.map((pid) => {
         const p = postById(pid);
