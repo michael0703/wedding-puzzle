@@ -110,6 +110,17 @@ a:hover { color: #b0005a; }
   color: #8a6400;
   cursor: pointer;
 }
+.reset-pill {
+  font: inherit;
+  font-size: 14px;
+  padding: 2px 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--pink-deep);
+  cursor: pointer;
+}
+.reset-pill:hover { background: var(--pink-soft); }
 
 /* ---------- 版面 ---------- */
 .layout {

@@ -106,10 +106,6 @@ window.SETTINGS = {
     { showIf: 'order', name: '學長', avatar: '😎', date: '2018/05/18 22:35', text: '主角根本殺不死，手斷掉還會自己長回來 = =', reply: '那一段真的看到傻眼' },
     { showIf: 'order', name: '阿明', avatar: '🤓', date: '2018/05/18 21:50', text: '他都穿紅色緊身衣，說這樣流血別人才看不出來', reply: '這個梗我笑超久' },
     { showIf: 'order', name: '小胖', avatar: '🐷', date: '2018/05/18 20:31', text: '你們看的那部喔？主角講話跟威威你一樣好笑，整部都在講幹話 XDD', reply: '對對對就是那部！' },
-    { name: '芬芬', avatar: '🐟', date: '2018/05/10 14:20', text: '威威 筆記借我抄一下 拜託 QQ', reply: '你上次借的還沒還耶 = =' },
-    { name: '芬芬', avatar: '🐟', date: '2018/05/06 22:48', text: '下次換你請客喔！', reply: '好啦好啦 (錢包哭哭)' },
-    { name: '(悄悄話)', avatar: '🔒', date: '2011/10/20 23:05', private: true, text: '此留言為悄悄話，僅版主可以閱讀。' },
-    { name: '小胖', avatar: '🐷', date: '2011/05/03 12:01', text: '版主好～來踩踩 有空回踩喔!!', reply: '踩回去了 XD' },
   ],
 
   profile: {

@@ -191,6 +191,7 @@
           ${S.calendar ? '<a href="#/calendar" data-tab="calendar">行事曆</a>' : ''}
           <a href="#/profile" data-tab="profile">關於我</a>
           <button type="button" class="keys-pill" id="keysPill" aria-label="秘密進度"></button>
+          <button type="button" class="reset-pill" data-reset>↺ 重新開始</button>
         </nav>
         <div class="layout">
           <main id="main"><p class="muted">載入中……</p></main>
@@ -203,6 +204,10 @@
       <div class="toast" id="toast" hidden></div>`;
 
     $('#hintFab').addEventListener('click', () => openHints());
+    // 「重新開始」按鈕在好幾個地方都有（導覽列、側邊欄、關於我），統一在這裡處理
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('[data-reset]')) resetGame();
+    });
     $('#keysPill').addEventListener('click', () => openHints());
     $('#modal').addEventListener('click', (e) => {
       if (e.target.id === 'modal') closeModal();
@@ -234,6 +239,7 @@
       <section class="box">
         <h3>🔑 秘密進度 ${solvedCount()}/${LOCK_IDS.length}</h3>
         <ul class="plain">${lockList}</ul>
+        <p class="small"><button type="button" class="link-btn" data-reset>↺ 重新開始遊戲</button></p>
       </section>
       ${S.calendar ? `<section class="box">
         <h3>☆ 行事曆</h3>
@@ -241,7 +247,7 @@
       </section>` : ''}
       <section class="box">
         <h3>☆ 最新留言</h3>
-        <ul class="plain">${latest}</ul>
+        <ul class="plain">${latest || '<li class="muted">還沒有留言</li>'}</ul>
       </section>
       <section class="box">
         <h3>☆ 人氣</h3>
@@ -645,7 +651,7 @@
     return `
       <h2 class="section-title">☆ 留言板</h2>
       <p class="small muted">有來就留言～留言必回踩！</p>
-      ${items}`;
+      ${items || '<p class="muted center">還沒有人留言，快來搶頭香！</p>'}`;
   }
 
   // ----- 行事曆 -----
@@ -718,7 +724,7 @@
         <table class="profile-table">${rows}</table>
       </div>
       ${P.about ? `<p>${P.about}</p>` : ''}
-      <p class="reset-row"><button type="button" class="link-btn" id="resetBtn">重新開始遊戲</button></p>`;
+      <p class="reset-row"><button type="button" class="link-btn" data-reset>重新開始遊戲</button></p>`;
   }
 
   function notFound() {
@@ -770,18 +776,16 @@
     $$('.sort-box').forEach(bindSort);
     $$('form.claim-form').forEach(bindClaim);
     $$('.cal').forEach(bindCalendar);
-    const reset = $('#resetBtn');
-    if (reset) {
-      reset.addEventListener('click', () => {
-        if (!confirm('確定要清除進度、重新開始嗎？\n（已登記的抽獎序號也會從這支手機上消失）')) return;
-        state = freshState();
-        state.sortSlots = SORT.answer.map(() => null);
-        saveState();
-        location.hash = '#/';
-        refresh();
-        showIntro();
-      });
-    }
+  }
+
+  function resetGame() {
+    if (!confirm('確定要清除進度、重新開始嗎？\n（已登記的抽獎序號也會從這支手機上消失）')) return;
+    state = freshState();
+    state.sortSlots = SORT.answer.map(() => null);
+    saveState();
+    location.hash = '#/';
+    refresh();
+    showIntro();
   }
 
   function solve(lockId) {
