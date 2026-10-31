@@ -316,7 +316,7 @@
 
     // ---------- 狀態（存在這台電腦，不小心重新整理也不會掉） ----------
     function fresh() {
-      return { phase: 'login', entries: [], frozenAt: null, winners: [], skipped: [], current: null };
+      return { phase: 'login', entries: [], frozenAt: null, winners: [], skipped: [], current: null, extra: 0 };
     }
     function load() {
       try { return Object.assign(fresh(), JSON.parse(localStorage.getItem(STORE_KEY) || '{}')); } catch (e) { return fresh(); }
@@ -530,6 +530,10 @@
     const pool = () => state.entries.filter((e) =>
       !state.winners.some((w) => idOf(w) === idOf(e)) && !state.skipped.includes(idOf(e)));
     const prizeIndex = () => state.winners.length;
+    // 名額 = settings.js 的獎項 + 現場臨時加碼的
+    const totalPrizes = () => D.prizes.length + (state.extra || 0);
+    const prizeName = (i) => D.prizes[i] || `加碼第 ${i - D.prizes.length + 1} 個紅包`;
+    const addPrize = () => { if (rolling) return; state.extra = (state.extra || 0) + 1; save(); render(); };
     const nameClass = (name) => (String(name).length > 4 ? ' long' : '');
 
     function ticket(w) {
@@ -537,7 +541,7 @@
     }
 
     function renderDraw() {
-      const total = D.prizes.length;
+      const total = totalPrizes();
       const done = prizeIndex() >= total;
       const cur = state.current; // 剛抽出、還沒確認的得獎者
       const winners = state.winners.map(ticket).join('');
@@ -549,8 +553,10 @@
             <div class="done-title">🎉 抽獎結束 🎉</div>
             <div class="winners final">${winners}</div>
             <p class="muted">得獎的賓客請出示破關畫面截圖，核對序號後領取紅包</p>
+            ${pool().length ? '<button class="btn btn-gold" type="button" id="more">🎁 加碼再抽一個</button>' : ''}
           </div>
           ${footer()}`;
+        if ($('#more')) $('#more').addEventListener('click', addPrize);
         bindFooter();
         return;
       }
@@ -564,13 +570,14 @@
           <button class="btn btn-gold" type="button" id="confirm">恭喜！${prizeIndex() + 1 < total ? '下一個獎' : '完成'}</button>
           <button class="btn btn-ghost" type="button" id="redraw">不在現場，重抽</button>`;
       } else {
-        actions = `<button class="btn go" type="button" id="go" ${pool().length ? '' : 'disabled'}>開 始 抽 獎</button>`;
+        actions = `<button class="btn go" type="button" id="go" ${pool().length ? '' : 'disabled'}>開 始 抽 獎</button>
+          <div><button class="btn btn-ghost btn-small" type="button" id="more">＋ 加碼一個名額</button></div>`;
       }
       app.innerHTML = `
         ${header(`共 ${state.entries.length} 位破關賓客參加抽獎`)}
         <div class="card">
           <div class="prize-row">
-            <span class="prize">🧧 ${esc(D.prizes[prizeIndex()])}</span>
+            <span class="prize">🧧 ${esc(prizeName(prizeIndex()))}</span>
             <span class="progress">${prizeIndex() + 1} / ${total}</span>
           </div>
           <div class="reel${cur ? ' win' : ''}" id="reel"><div class="reel-strip" id="strip">${reelItem}</div></div>
@@ -581,8 +588,9 @@
         ${winners ? `<div class="winners">${winners}</div>` : ''}
         ${footer()}`;
       if ($('#go')) $('#go').addEventListener('click', roll);
+      if ($('#more')) $('#more').addEventListener('click', addPrize);
       if ($('#confirm')) $('#confirm').addEventListener('click', () => {
-        state.winners.push(Object.assign({ prize: D.prizes[prizeIndex()] }, state.current));
+        state.winners.push(Object.assign({ prize: prizeName(prizeIndex()) }, state.current));
         state.current = null;
         save();
         render();
