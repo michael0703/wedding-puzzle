@@ -486,9 +486,13 @@
         if (refresh.busy) return;
         refresh.busy = true;
         try {
-          state.entries = await fetchEntries();
+          const entries = await fetchEntries();
+          // 名單沒變就不重畫，免得每 10 秒整個畫面閃一下
+          const changed = entries.map(idOf).join() !== state.entries.map(idOf).join();
+          state.entries = entries;
           save();
-          if (state.phase === 'collect') renderCollect();
+          if (changed && state.phase === 'collect') renderCollect();
+          else if ($('#msg')) $('#msg').textContent = '';
         } catch (err) {
           const m = $('#msg');
           if (m) m.textContent = err.message;
